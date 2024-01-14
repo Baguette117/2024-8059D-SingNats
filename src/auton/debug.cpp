@@ -12,7 +12,7 @@ void debugTerminal(void* ignore){
     while(true){
         if(inertial.is_calibrating()){
             printf("Inertial is calibrating\n");
-            master.print(2, 0, "Inertial is calibrating");
+            // master.print(2, 0, "Inertial is calibrating");
         }else{
             if(debugMode & 1) printControl();
             if(debugMode & 2) printOdom();
