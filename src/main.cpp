@@ -23,13 +23,13 @@ void initialize() {
     Motor rightMid(rightMidPort, rightMidGearset, rightMidReversed, rightMidEncoder);
     Motor rightBack(rightBackPort, rightBackGearset, rightBackReversed, rightBackEncoder);
 	Motor intake(intakePort, MOTOR_GEAR_GREEN, false, MOTOR_ENCODER_DEGREES);
-	Motor catapult(catapultPort, MOTOR_GEAR_RED, false, MOTOR_ENCODER_DEGREES);
+	Motor cata(cataPort, MOTOR_GEAR_GREEN, false, MOTOR_ENCODER_DEGREES);
 	ADIDigitalOut wingLeft(wingLeftPort, false);
 	ADIDigitalOut wingRight(wingRightPort, false);
     Imu inertial(inertialPort);
 	Controller master(CONTROLLER_MASTER);
 
-	master.clear();
+	Task cataPIDTask(cataPID, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Cata PID Task");
 }
 
 /**
@@ -84,18 +84,25 @@ void opcontrol() {
     Motor rightMid(rightMidPort, rightMidReversed);
     Motor rightBack(rightBackPort, rightBackReversed);
 	Motor intake(intakePort, false);
-	Motor catapult(catapultPort, false);
+	Motor cata(cataPort, false);
 	ADIDigitalOut wingLeft(wingLeftPort, false);
 	ADIDigitalOut wingRight(wingRightPort, false);
     Imu inertial(inertialPort);
 	Controller master(CONTROLLER_MASTER);
 
-	bool invert = false, wingLeftState = false, wingRightState = false;
+	bool invert = true, wingLeftState = false, wingRightState = false;
 	double left, right;
 
+	leftFront.set_brake_mode(MOTOR_BRAKE_HOLD);
+	leftMid.set_brake_mode(MOTOR_BRAKE_HOLD);
+	leftBack.set_brake_mode(MOTOR_BRAKE_HOLD);
+	rightFront.set_brake_mode(MOTOR_BRAKE_HOLD);
+	rightMid.set_brake_mode(MOTOR_BRAKE_HOLD);
+	rightBack.set_brake_mode(MOTOR_BRAKE_HOLD);
+
     while (true) {
-		left = master.get_analog(ANALOG_LEFT_Y);
-		right = master.get_analog(ANALOG_RIGHT_Y);
+		left = 1.27*master.get_analog(ANALOG_LEFT_Y);
+		right = 1.27*master.get_analog(ANALOG_RIGHT_Y);
 
 		if(invert){
 			leftFront.move(-right);
@@ -115,46 +122,24 @@ void opcontrol() {
 
 		if(master.get_digital(DIGITAL_L1)){
 			intake.move(-127);
-		} else if(master.get_digital(DIGITAL_L2)){
+		} else if(master.get_digital(DIGITAL_R1)){
 			intake.move(127);
 		} else {
 			intake.move(0);
 		}
 
-		if (master.get_digital(DIGITAL_R1)) {
-			catapult.move(127);
-		} else if (master.get_digital(DIGITAL_R2)) {
-			catapult.move(-127);
-		} else {
-			catapult.move(0);
-		}
-
 		//wing buttons are swapped because the wings are backwards
-		if(master.get_digital_new_press(DIGITAL_RIGHT)){
+		if(master.get_digital_new_press(DIGITAL_R2)){
 			wingLeftState = !wingLeftState;
 			wingLeft.set_value(wingLeftState);
 		}
 
-		if(master.get_digital_new_press(DIGITAL_LEFT)){
+		if(master.get_digital_new_press(DIGITAL_L2)){
 			wingRightState = !wingRightState;
 			wingRight.set_value(wingRightState);
 		}
 
 		if(master.get_digital_new_press(DIGITAL_UP)){
-			wingLeftState = true;
-			wingRightState = true;
-			wingLeft.set_value(wingLeftState);
-			wingRight.set_value(wingRightState);
-		}
-
-		if(master.get_digital_new_press(DIGITAL_DOWN)){
-			wingLeftState = false;
-			wingRightState = false;
-			wingLeft.set_value(wingLeftState);
-			wingRight.set_value(wingRightState);
-		}
-
-		if(master.get_digital_new_press(DIGITAL_Y)){
 			invert = !invert;
 		}
         delay(20);
