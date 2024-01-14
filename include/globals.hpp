@@ -44,7 +44,7 @@
 #define leftDist 6.102
 
 //catapult
-#define catapultPort 6
+#define cataPort 6
 
 //intake
 #define intakePort 10
