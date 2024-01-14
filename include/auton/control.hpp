@@ -1,14 +1,14 @@
 #ifndef _CONTROL_
 #define _CONTROL_
 
-#define defaultKP .165
-#define defaultKD .8
-#define defaultTurnKP .3
-#define defaultTurnKD .3
+#define defaultKP .21
+#define defaultKD 3.3
+#define defaultTurnKP .35
+#define defaultTurnKD .5
 #define defaultRampingMax 2
-#define defaultDistanceTolerance 7.5
-#define defaultBearingTolerance 22.5
-#define defaultVelocityTolerance 2.4
+#define defaultDistanceTolerance 25
+#define defaultBearingTolerance 30
+#define defaultVelocityTolerance -2.4
 #define defaultSpeedCap 80
 
 //control task
@@ -22,7 +22,7 @@ bool controlMove(double inches, double timeout = 0, double kp = defaultKP, doubl
 bool controlTurn(double degrees, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD);
 
 //absolute movements
-bool controlMoveTo(double x, double y, double turnTimeout = 0, double moveTimeout = 0, double moveKP = defaultKP, double moveKD = defaultKD, double turnKP = defaultTurnKP, double turnKD = defaultTurnKD);
+bool controlMoveTo(bool backwards, double x, double y, double turnTimeout = 0, double moveTimeout = 0, double moveKP = defaultKP, double moveKD = defaultKD, double turnKP = defaultTurnKP, double turnKD = defaultTurnKD);
 bool controlTurnTo(double bearing, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD);
 bool controlTurnLeftTo(double bearing, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD);
 bool controlTurnRightTo(double bearing, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD);
