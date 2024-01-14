@@ -1,7 +1,4 @@
 #include "main.h"
-#include "odom.hpp"
-#include "pros/misc.hpp"
-#include "pros/rtos.hpp"
 
 //externs
 double controlSpeedCap = defaultSpeedCap, controlKP = defaultKP, controlKD = defaultKD, controlTurnKP = defaultTurnKP, controlTurnKD = defaultTurnKD, controlRampingMax = defaultRampingMax;
@@ -108,6 +105,7 @@ bool controlMove(double inches, double timeout, double kp, double kd){
         printf("Moving\n");
         delay(250);
     }
+
     return true;
 }
 
@@ -136,17 +134,23 @@ bool controlTurn(double degrees, double timeout, double kp, double kd){
 
 
 //absolute movements
-bool controlMoveTo(double x, double y, double turnTimeout, double moveTimeout, double moveKP, double moveKD, double turnKP, double turnKD){
+bool controlMoveTo(bool backwards, double x, double y, double turnTimeout, double moveTimeout, double moveKP, double moveKD, double turnKP, double turnKD){
     printf("controlMoveTo | x: %f\ty: %f\ttimeout: %f, %f\n", x, y, turnTimeout, moveTimeout);
 
+    bool success = false;
     double diffX = x - odomGlobalX, diffY = y - odomGlobalY;
     double distance = sqrt(diffX*diffX + diffY*diffY);
     double angle = atan2(diffY, diffX);
     double bearing = boundDeg(90 - angle*toDegree);
 
-    if(!controlTurnTo(bearing, turnTimeout, turnKP, turnKD)) return false;;
-    if(!controlMove(distance, moveTimeout, moveKP, moveKD)) return false;
-    return true;
+    if(backwards){
+        success = controlTurnTo(boundDeg(bearing+180), turnTimeout, turnKP, turnKD);
+        success &= controlMove(-distance, moveTimeout, moveKP, moveKD);
+    } else {
+        success = controlTurnTo(bearing, turnTimeout, turnKP, turnKD);
+        success &= controlMove(distance, moveTimeout, moveKP, moveKD);
+    }
+    return success;
 }
 
 bool controlTurnTo(double bearing, double timeout, double kp, double kd){
@@ -154,7 +158,7 @@ bool controlTurnTo(double bearing, double timeout, double kp, double kd){
     controlTurnMode = true;
     printf("controlTurnTo | bearing: %f\ttimeout: %f\n", bearing, timeout);
 
-    double errorBearing = boundDeg(controlTargBearing - bearing);
+    double errorBearing = boundDeg(bearing - controlTargBearing);
     if(errorBearing > 180) errorBearing -= 360;
 
     controlTurnKP = kp;
@@ -180,7 +184,7 @@ bool controlTurnLeftTo(double bearing, double timeout, double kp, double kd){
     controlTurnMode = true;
     printf("controlTurnLeftTo | bearing: %f\ttimeout: %f\n", bearing, timeout);
 
-    double errorBearing = controlTargBearing - bearing;
+    double errorBearing = bearing - controlTargBearing;
     if (errorBearing > 0) errorBearing -= 360;
 
     controlTurnKP = kp;
@@ -206,7 +210,7 @@ bool controlTurnRightTo(double bearing, double timeout, double kp, double kd){
     controlTurnMode = true;
     printf("controlTurnRightTo | bearing: %f\ttimeout: %f\n", bearing, timeout);
 
-    double errorBearing = controlTargBearing - bearing;
+    double errorBearing = bearing - controlTargBearing;
     if (errorBearing < 0) errorBearing += 360;
 
     controlTurnKP = kp;
