@@ -4,7 +4,7 @@ double odomGlobalX, odomGlobalY, globalDeltaY, globalDeltaX, localX, localY, odo
 
 void odomTracker(void *ignore){
     printf("Odom tracker started\n");
-    IMU inertial (inertialPort);
+    IMU inertial(inertialPort);
 
     //Rotating vector
     double ethan;
