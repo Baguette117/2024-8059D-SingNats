@@ -11,5 +11,6 @@
  *  returns true if the path was completed successfully
 */
 bool calibration(int path);
+void matchload();
 
 #endif
