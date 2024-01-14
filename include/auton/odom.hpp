@@ -1,8 +1,8 @@
 #ifndef _ODOM_
 #define _ODOM_
 
-#define degPerInch 70.81946774
-#define degPerDeg 6.903682494
+#define degPerInch 64.819467732
+#define degPerDeg 6.901010102
 
 //odom task
 void odomTracker(void* ignore);
