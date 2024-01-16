@@ -1,7 +1,11 @@
+#include "control.hpp"
 #include "main.h"
+#include "pros/misc.h"
+#include "pros/misc.hpp"
+#include "sensors.hpp"
 
 //externs
-double controlSpeedCap = defaultSpeedCap, controlKP = defaultKP, controlKD = defaultKD, controlTurnKP = defaultTurnKP, controlTurnKD = defaultTurnKD, controlRampingMax = defaultRampingMax;
+double controlSpeedCap = defaultSpeedCap, controlKP = defaultKP, controlKD = defaultKD, controlKI = defaultKI, controlTurnKP = defaultTurnKP, controlTurnKD = defaultTurnKD, controlTurnKI = defaultTurnKI, controlRampingMax = defaultRampingMax;
 //wheels
 double controlPowLeft, controlPowRight, controlTargPowLeft = 0, controlTargPowRight = 0, controlTargLeft = 0, controlTargRight = 0, controlErrorLeft, controlErrorRight, controlPrevErrorLeft = 0, controlPrevErrorRight = 0, controlDerivLeft, controlDerivRight;
 //orientation
@@ -17,6 +21,7 @@ void controlPID(void *ignore){
     Motor rightMid(rightMidPort, rightMidGearset, rightMidReversed, rightMidEncoder);
     Motor rightBack(rightBackPort, rightBackGearset, rightBackReversed, rightBackEncoder);
     Imu inertial(inertialPort);
+    Controller master (CONTROLLER_MASTER);
 
     double deltaLeft, deltaRight;
 
@@ -26,6 +31,7 @@ void controlPID(void *ignore){
     rightFront.tare_position();
     rightMid.tare_position();
     rightBack.tare_position();
+    master.clear();
 
     while(true){
         if (controlPIDEnable && !inertial.is_calibrating()){
@@ -42,10 +48,20 @@ void controlPID(void *ignore){
                 controlTargPowLeft = controlErrorLeft*controlTurnKP + controlDerivLeft*controlTurnKD;
                 controlTargPowRight = controlErrorRight*controlTurnKP + controlDerivRight*controlTurnKD;
 
+                if(fabs(controlErrorLeft) < defaultBearingTolerance && fabs(controlErrorRight) < defaultBearingTolerance){
+                    controlTargPowLeft  = absadd(controlTargLeft, controlTurnKI);
+                    controlTargPowRight += absadd(controlTargRight, controlTurnKI); 
+                }
+
                 // controlErrorBearing = controlTargBearing - sensorsBearing;
             }else{
                 controlTargPowLeft = controlErrorLeft*controlKP + controlDerivLeft*controlKD;
                 controlTargPowRight = controlErrorRight*controlKP + controlDerivRight*controlKD;
+            
+                if(fabs(controlErrorLeft) < defaultDistanceTolerance && fabs(controlErrorRight) < defaultDistanceTolerance){
+                    controlTargPowLeft = absadd(controlTargPowLeft, controlKI);
+                    controlTargPowRight = absadd(controlTargPowRight, controlKI);
+                }
             }
 
             controlTargPowLeft = controlKP*controlErrorLeft + controlKD*controlDerivLeft;
@@ -85,13 +101,14 @@ void controlDrive(double left, double right){
 
 
 //relative movements
-bool controlMove(double inches, double timeout, double kp, double kd){
+bool controlMove(double inches, double timeout, double kp, double kd, double ki){
     double start = millis();
     controlTurnMode = false;
     printf("controlMove | inches: %f\ttimeout: %f\n", inches, timeout);
 
     controlKP = kp;
     controlKD = kd;
+    controlKI = ki;
 
     controlTargLeft += inches*degPerInch;
     controlTargRight += inches*degPerInch;
@@ -109,13 +126,14 @@ bool controlMove(double inches, double timeout, double kp, double kd){
     return true;
 }
 
-bool controlTurn(double degrees, double timeout, double kp, double kd){
+bool controlTurn(double degrees, double timeout, double kp, double kd, double ki){
     double start = millis();
     controlTurnMode = true;
     printf("controlTurn | degrees: %f\ttimeout: %f\n", degrees, timeout);
 
     controlTurnKP = kp;
     controlTurnKD = kd;
+    controlTurnKI = ki;
     controlTargLeft += degrees*degPerDeg;
     controlTargRight -= degrees*degPerDeg;
     controlTargBearing = boundDeg(controlTargBearing + degrees);
@@ -134,7 +152,7 @@ bool controlTurn(double degrees, double timeout, double kp, double kd){
 
 
 //absolute movements
-bool controlMoveTo(bool backwards, double x, double y, double turnTimeout, double moveTimeout, double moveKP, double moveKD, double turnKP, double turnKD){
+bool controlMoveTo(bool backwards, double x, double y, double turnTimeout, double moveTimeout, double moveKP, double moveKD, double moveKI, double turnKP, double turnKD, double turnKI){
     printf("controlMoveTo | x: %f\ty: %f\ttimeout: %f, %f\n", x, y, turnTimeout, moveTimeout);
 
     bool success = false;
@@ -144,25 +162,26 @@ bool controlMoveTo(bool backwards, double x, double y, double turnTimeout, doubl
     double bearing = boundDeg(90 - angle*toDegree);
 
     if(backwards){
-        success = controlTurnTo(boundDeg(bearing+180), turnTimeout, turnKP, turnKD);
-        success &= controlMove(-distance, moveTimeout, moveKP, moveKD);
+        success = controlTurnTo(boundDeg(bearing+180), turnTimeout, turnKP, turnKD, turnKI);
+        success &= controlMove(-distance, moveTimeout, moveKP, moveKD, moveKI);
     } else {
-        success = controlTurnTo(bearing, turnTimeout, turnKP, turnKD);
-        success &= controlMove(distance, moveTimeout, moveKP, moveKD);
+        success = controlTurnTo(bearing, turnTimeout, turnKP, turnKD, turnKI);
+        success &= controlMove(distance, moveTimeout, moveKP, moveKD, moveKI);
     }
     return success;
 }
 
-bool controlTurnTo(double bearing, double timeout, double kp, double kd){
+bool controlTurnTo(double bearing, double timeout, double kp, double kd, double ki){
     double start = millis();
     controlTurnMode = true;
     printf("controlTurnTo | bearing: %f\ttimeout: %f\n", bearing, timeout);
 
-    double errorBearing = boundDeg(bearing - controlTargBearing);
+    double errorBearing = boundDeg(bearing - sensorsBearing);
     if(errorBearing > 180) errorBearing -= 360;
 
     controlTurnKP = kp;
     controlTurnKD = kd;
+    controlTurnKI = ki;
     controlTargLeft += errorBearing*degPerDeg;
     controlTargRight -= errorBearing*degPerDeg;
     controlTargBearing = bearing;
@@ -179,16 +198,17 @@ bool controlTurnTo(double bearing, double timeout, double kp, double kd){
     return true;
 }
 
-bool controlTurnLeftTo(double bearing, double timeout, double kp, double kd){
+bool controlTurnLeftTo(double bearing, double timeout, double kp, double kd, double ki){
     double start = millis();
     controlTurnMode = true;
     printf("controlTurnLeftTo | bearing: %f\ttimeout: %f\n", bearing, timeout);
 
-    double errorBearing = bearing - controlTargBearing;
+    double errorBearing = bearing - sensorsBearing;
     if (errorBearing > 0) errorBearing -= 360;
 
     controlTurnKP = kp;
     controlTurnKD = kd;
+    controlTurnKI = ki;
     controlTargLeft -= errorBearing*degPerDeg;
     controlTargRight += errorBearing*degPerDeg;
     controlTargBearing = bearing;
@@ -205,16 +225,17 @@ bool controlTurnLeftTo(double bearing, double timeout, double kp, double kd){
     return true;
 }
 
-bool controlTurnRightTo(double bearing, double timeout, double kp, double kd){
+bool controlTurnRightTo(double bearing, double timeout, double kp, double kd, double ki){
     double start = millis();
     controlTurnMode = true;
     printf("controlTurnRightTo | bearing: %f\ttimeout: %f\n", bearing, timeout);
 
-    double errorBearing = bearing - controlTargBearing;
+    double errorBearing = bearing - sensorsBearing;
     if (errorBearing < 0) errorBearing += 360;
 
     controlTurnKP = kp;
     controlTurnKD = kd;
+    controlTurnKI = ki;
     controlTargLeft -= errorBearing*degPerDeg;
     controlTargRight += errorBearing*degPerDeg;
     controlTargBearing = bearing;

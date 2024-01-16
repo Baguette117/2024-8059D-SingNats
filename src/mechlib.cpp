@@ -28,7 +28,7 @@ void cataPID(void* ignore){
             cata.move(power);
             prevError = error;
         }
-        master.print(0, 0, "Cata: %f", error);
+        // master.print(0, 0, "Cata: %f", error);
         delay(25);
     }
 }

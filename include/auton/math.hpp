@@ -8,8 +8,9 @@
 #define tau 6.2831853071795864769252867665590057683943387987502116419498891846156328125
 #define halfPi 1.5707964
 
-double boundRad (double radians);
-double boundDeg (double degrees);
-double cap (double value, double cap);
+double cap(double value, double cap);
+double absadd(double value, double add);
+double boundRad(double radians);
+double boundDeg(double degrees);
 
 #endif

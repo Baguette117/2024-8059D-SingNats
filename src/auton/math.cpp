@@ -1,9 +1,15 @@
 #include "main.h"
 
 double cap(double value, double cap){
-    if(value > cap) return cap;
-    else if(value < -cap) return -cap;
+    if (value > cap) return cap;
+    else if (value < -cap) return -cap;
     else return value;
+}
+
+double absadd(double value, double add){
+    if (value > 0) value += add;
+    else if (value < 0) value -= add;
+    return value;
 }
 
 double boundRad(double radians){

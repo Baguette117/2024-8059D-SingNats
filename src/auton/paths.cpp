@@ -11,11 +11,11 @@ bool calibration(int path){
 
     switch (path){
         case 0:
-            success = controlMove(24, 10000);
+            success = controlMove(24, 3000);
             break;
 
         case 1:
-            success = controlTurn(180, 3000);
+            success = controlTurn(45, 3000);
             break;
 
         case 2:
@@ -25,7 +25,6 @@ bool calibration(int path){
             break;
     }
 
-    delay(5000);
     controlPIDEnable = false;
     autonDebugTask.remove();
     autonPIDTask.remove();
@@ -46,20 +45,22 @@ void matchload(){
 	ADIDigitalOut wingRight(wingRightPort, false);
     controlPIDEnable = true;
 
-    controlMove(32, 2000);
-    controlTurn(45, 1000);
+    controlMove(28, 3000);
+    controlTurnTo(45, 1500);
+    controlSpeedCap = 80;
     intake.move(80);
     controlMove(5, 100);
     intake.move(0);
+    controlSpeedCap = 120;
     controlMove(25, 650);
-    controlMove(-30, 2000);
-    controlTurn(-45, 1250);
+    controlMove(-25, 1000);
+    controlTurnTo(0, 1250, 3);
     wingLeft.set_value(true);
-    controlMove(-20, 1000);
+    controlMove(-25, 1000);
     wingLeft.set_value(false);
-    controlMoveTo(true, 15, -15, 1000, 1000);
-    wingRight.set_value(true);
-    controlMoveTo(true, 23, -23, 1000, 1000);
+    controlMoveTo(true, 15, -15, 2000, 1000);
+    // wingRight.set_value(true);
+    // controlMoveTo(true, 23, -23, 1000, 1000);
 
     delay(250);
     controlPIDEnable = false;
