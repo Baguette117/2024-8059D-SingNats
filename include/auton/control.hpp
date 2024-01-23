@@ -4,9 +4,9 @@
 #define defaultKP .14
 #define defaultKD 5
 #define defaultKI 8
-#define defaultTurnKP 1.2
-#define defaultTurnKD 2
-#define defaultTurnKI 15
+#define defaultTurnKP .23
+#define defaultTurnKD .37
+#define defaultTurnKI 13
 #define defaultRampingMax 2
 #define defaultDistanceTolerance 25
 #define defaultBearingTolerance 2

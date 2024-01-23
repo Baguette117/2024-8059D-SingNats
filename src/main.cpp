@@ -93,7 +93,8 @@ void opcontrol() {
 	bool invert = true, wingLeftState = false, wingRightState = false;
 	double left, right;
 
-	matchload();
+	// matchload();
+	calibration(0);
 
 	leftFront.set_brake_mode(MOTOR_BRAKE_HOLD);
 	leftMid.set_brake_mode(MOTOR_BRAKE_HOLD);

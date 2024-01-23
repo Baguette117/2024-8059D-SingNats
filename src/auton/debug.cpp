@@ -16,7 +16,7 @@ void debugTerminal(void* ignore){
         }else{
             if(debugMode & 1) printControl();
             if(debugMode & 2) printOdom();
-            if(debugMode % 4) printSensors();
+            if(debugMode & 4) printSensors();
         }
         delay(interval);
     }

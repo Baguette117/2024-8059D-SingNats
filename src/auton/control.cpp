@@ -50,7 +50,7 @@ void controlPID(void *ignore){
 
                 if(fabs(controlErrorLeft) < defaultBearingTolerance && fabs(controlErrorRight) < defaultBearingTolerance){
                     controlTargPowLeft  = absadd(controlTargLeft, controlTurnKI);
-                    controlTargPowRight += absadd(controlTargRight, controlTurnKI); 
+                    controlTargPowRight = absadd(controlTargRight, controlTurnKI); 
                 }
 
                 // controlErrorBearing = controlTargBearing - sensorsBearing;
@@ -64,9 +64,7 @@ void controlPID(void *ignore){
                 }
             }
 
-            controlTargPowLeft = controlKP*controlErrorLeft + controlKD*controlDerivLeft;
             deltaLeft = controlTargPowLeft - controlPowLeft;
-            controlTargPowRight = controlKP*controlErrorRight + controlKD*controlDerivRight;
             deltaRight = controlTargPowRight - controlPowRight;
 
             controlPowLeft += cap(deltaLeft, controlRampingMax);
@@ -113,14 +111,14 @@ bool controlMove(double inches, double timeout, double kp, double kd, double ki)
     controlTargLeft += inches*degPerInch;
     controlTargRight += inches*degPerInch;
 
-    delay(250);
+    delay(50);
     while(fabs(controlErrorLeft) > defaultDistanceTolerance || fabs(controlErrorRight) > defaultDistanceTolerance || fabs(sensorsVelocity) > defaultVelocityTolerance){
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Moving\n");
-        delay(250);
+        delay(50);
     }
 
     return true;
@@ -138,14 +136,14 @@ bool controlTurn(double degrees, double timeout, double kp, double kd, double ki
     controlTargRight -= degrees*degPerDeg;
     controlTargBearing = boundDeg(controlTargBearing + degrees);
 
-    delay(250);
+    delay(50);
     while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(250);
+        delay(50);
     }
     return true;
 }
@@ -154,6 +152,7 @@ bool controlTurn(double degrees, double timeout, double kp, double kd, double ki
 //absolute movements
 bool controlMoveTo(bool backwards, double x, double y, double turnTimeout, double moveTimeout, double moveKP, double moveKD, double moveKI, double turnKP, double turnKD, double turnKI){
     printf("controlMoveTo | x: %f\ty: %f\ttimeout: %f, %f\n", x, y, turnTimeout, moveTimeout);
+    Controller master(CONTROLLER_MASTER);
 
     bool success = false;
     double diffX = x - odomGlobalX, diffY = y - odomGlobalY;
@@ -161,8 +160,11 @@ bool controlMoveTo(bool backwards, double x, double y, double turnTimeout, doubl
     double angle = atan2(diffY, diffX);
     double bearing = boundDeg(90 - angle*toDegree);
 
+    master.print(0, 0, "%f %f", diffX, diffY);
+    master.print(1, 0, "%f %f", bearing, distance);
+
     if(backwards){
-        success = controlTurnTo(boundDeg(bearing+180), turnTimeout, turnKP, turnKD, turnKI);
+        success = controlTurnTo(boundDeg(bearing + 180), turnTimeout, turnKP, turnKD, turnKI);
         success &= controlMove(-distance, moveTimeout, moveKP, moveKD, moveKI);
     } else {
         success = controlTurnTo(bearing, turnTimeout, turnKP, turnKD, turnKI);
@@ -186,14 +188,14 @@ bool controlTurnTo(double bearing, double timeout, double kp, double kd, double 
     controlTargRight -= errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
-    delay(250);
+    delay(50);
     while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(250);
+        delay(50);
     }
     return true;
 }
@@ -213,14 +215,14 @@ bool controlTurnLeftTo(double bearing, double timeout, double kp, double kd, dou
     controlTargRight += errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
-    delay(250);
+    delay(50);
     while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(250);
+        delay(50);
     }
     return true;
 }
@@ -240,14 +242,14 @@ bool controlTurnRightTo(double bearing, double timeout, double kp, double kd, do
     controlTargRight += errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
-    delay(250);
+    delay(50);
     while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(250);
+        delay(50);
     }
     return true;
 }
@@ -262,17 +264,11 @@ void controlSetCoords(double x, double y, double bearing){
     Motor rightMid(rightMidPort, rightMidGearset, rightMidReversed, rightMidEncoder);
     Motor rightBack(rightBackPort, rightBackGearset, rightBackReversed, rightBackEncoder);
 
-    leftFront.tare_position();
-    leftMid.tare_position();
-    leftBack.tare_position();
-    rightFront.tare_position();
-    rightMid.tare_position();
-    rightBack.tare_position();
-
+    sensorsTare();
     odomSetCoords(x, y, bearing);
     controlTargLeft = 0;
     controlTargRight = 0;
-    controlTargBearing = bearing;
+    controlTargBearing = boundDeg(bearing);
     odomPrevPosLeft = 0;
     odomPrevPosRight = 0;
 }

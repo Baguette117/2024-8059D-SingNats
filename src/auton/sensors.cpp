@@ -1,6 +1,6 @@
 #include "main.h"
 
-double sensorsPosLeft, sensorsPosRight, sensorsVelocityLeft, sensorsVelocityRight, sensorsVelocity, sensorsBearing, sensorsAngle;
+double sensorsPosLeft, sensorsPosRight, sensorsVelocityLeft, sensorsVelocityRight, sensorsVelocity, sensorsBearing, sensorsAngle, sensorsBearingOffset = 0;
 
 void sensorsTracker(void *ignore){
     Motor leftFront(leftFrontPort, leftFrontGearset, leftFrontReversed, leftFrontEncoder);
@@ -20,15 +20,30 @@ void sensorsTracker(void *ignore){
             sensorsVelocityRight = (rightFront.get_actual_velocity() + rightMid.get_actual_velocity() + rightBack.get_actual_velocity())/3;
             sensorsVelocity = (sensorsVelocityLeft + sensorsVelocityRight)/2;
             
-            sensorsBearing = inertial.get_heading();
-            sensorsAngle = halfPi - sensorsBearing*toRadian;
+            sensorsBearing = boundDeg(inertial.get_heading() + sensorsBearingOffset);
+            sensorsAngle = boundRad(sensorsBearing*toRadian);
         }
 
         delay(5);
     }
 }
 
-void sensorsSetHeading(double heading){
-    Imu inertial(inertialPort);
-    inertial.set_heading(heading);
+void sensorsSetHeading(double bearing){
+    sensorsBearingOffset = bearing;
+}
+
+void sensorsTare(){
+    Motor leftFront(leftFrontPort, leftFrontGearset, leftFrontReversed, leftFrontEncoder);
+    Motor leftMid(leftMidPort, leftMidGearset, leftMidReversed, leftMidEncoder);
+    Motor leftBack(leftBackPort, leftBackGearset, leftBackReversed, leftBackEncoder);
+    Motor rightFront(rightFrontPort, rightFrontGearset, rightFrontReversed, rightFrontEncoder);
+    Motor rightMid(rightMidPort, rightMidGearset, rightMidReversed, rightMidEncoder);
+    Motor rightBack(rightBackPort, rightBackGearset, rightBackReversed, rightBackEncoder);
+    
+    leftFront.tare_position();
+    leftMid.tare_position();
+    leftBack.tare_position();
+    rightFront.tare_position();
+    rightMid.tare_position();
+    rightBack.tare_position();
 }

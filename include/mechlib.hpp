@@ -1,8 +1,7 @@
 #ifndef _MECHLIB_
 #define _MECHLIB_
 
-#define mechlibKP 7.5
-#define mechlibKD 30
+#define mechlibKP 5
 
 extern double targ;
 extern bool shoot;
