@@ -1,4 +1,3 @@
-#include "control.hpp"
 #include "main.h"
 
 int debugMode = 0b00000000;
@@ -37,9 +36,9 @@ void printOdom(){
         "GlobalDeltaX: %f, GlobalDeltaY: %f\n"
         "PrevPosLeft: %f, PrevPosRight: %f\n"
         "DeltaPosLeft: %f, DeltaPosRight: %f\n"
-        "PrevBearing: %f, DeltaBearing: %f, DeltaAngle: %f\n"
+        "PrevBearing: %f, DeltaAngle: %f\n"
         "radius: %f\n",
-        odomGlobalX, odomGlobalY, odomPrevPosLeft, odomPrevPosRight, odomDeltaPosLeft, odomDeltaPosRight, odomPrevBearing, odomDeltaBearing, odomDeltaAngle, localX, localY, globalDeltaX, globalDeltaY, odomRadius);
+        odomGlobalX, odomGlobalY, odomPrevPosLeft, odomPrevPosRight, odomDeltaPosLeft, odomDeltaPosRight, odomPrevAngle, odomDeltaAngle, localX, localY, globalDeltaX, globalDeltaY, odomRadius);
 }
 
 void printSensors(){

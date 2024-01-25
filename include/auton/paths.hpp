@@ -12,5 +12,6 @@
 */
 bool calibration(int path);
 void matchload();
+void balls();
 
 #endif

@@ -1,8 +1,4 @@
-#include "control.hpp"
 #include "main.h"
-#include "pros/misc.h"
-#include "pros/misc.hpp"
-#include "sensors.hpp"
 
 //externs
 double controlSpeedCap = defaultSpeedCap, controlKP = defaultKP, controlKD = defaultKD, controlKI = defaultKI, controlTurnKP = defaultTurnKP, controlTurnKD = defaultTurnKD, controlTurnKI = defaultTurnKI, controlRampingMax = defaultRampingMax;
@@ -31,7 +27,6 @@ void controlPID(void *ignore){
     rightFront.tare_position();
     rightMid.tare_position();
     rightBack.tare_position();
-    master.clear();
 
     while(true){
         if (controlPIDEnable && !inertial.is_calibrating()){
@@ -271,4 +266,5 @@ void controlSetCoords(double x, double y, double bearing){
     controlTargBearing = boundDeg(bearing);
     odomPrevPosLeft = 0;
     odomPrevPosRight = 0;
+    delay(50);
 }

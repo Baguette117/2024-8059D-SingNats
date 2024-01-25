@@ -30,6 +30,7 @@ void initialize() {
 	Controller master(CONTROLLER_MASTER);
 
 	Task cataPIDTask(cataPID, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Cata PID Task");
+	inertial.reset();
 }
 
 /**
@@ -37,7 +38,13 @@ void initialize() {
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() {}
+void disabled() {
+	// //matchload()
+	// ADIDigitalOut wingRight(wingRightPort, false);
+	// wingRight.set_value(true);
+
+	// //balls()
+}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -61,7 +68,10 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	// matchload();
+	balls();
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -92,9 +102,6 @@ void opcontrol() {
 
 	bool invert = true, wingLeftState = false, wingRightState = false;
 	double left, right;
-
-	// matchload();
-	calibration(0);
 
 	leftFront.set_brake_mode(MOTOR_BRAKE_HOLD);
 	leftMid.set_brake_mode(MOTOR_BRAKE_HOLD);

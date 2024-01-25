@@ -1,10 +1,10 @@
 #ifndef _CONTROL_
 #define _CONTROL_
 
-#define defaultKP .14
+#define defaultKP .18
 #define defaultKD 5
 #define defaultKI 8
-#define defaultTurnKP .23
+#define defaultTurnKP .25
 #define defaultTurnKD .37
 #define defaultTurnKI 13
 #define defaultRampingMax 2

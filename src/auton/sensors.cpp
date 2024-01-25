@@ -11,6 +11,13 @@ void sensorsTracker(void *ignore){
     Motor rightBack(rightBackPort, rightBackGearset, rightBackReversed, rightBackEncoder);
     Imu inertial(inertialPort);
 
+    leftFront.tare_position();
+    leftMid.tare_position();
+    leftBack.tare_position();
+    rightFront.tare_position();
+    rightMid.tare_position();
+    rightBack.tare_position();
+
     while(true){
         if(!inertial.is_calibrating()){
             sensorsPosLeft = (leftFront.get_position() + leftMid.get_position() + leftBack.get_position())/3;
@@ -29,7 +36,7 @@ void sensorsTracker(void *ignore){
 }
 
 void sensorsSetHeading(double bearing){
-    sensorsBearingOffset = bearing;
+    sensorsBearingOffset = bearing - sensorsBearing;
 }
 
 void sensorsTare(){
