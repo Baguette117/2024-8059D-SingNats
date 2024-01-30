@@ -1,14 +1,15 @@
 #include "main.h"
 
+//externs
 double odomGlobalX = 0, odomGlobalY = 0, globalDeltaY, globalDeltaX, localX, localY, odomRadius, odomPrevPosLeft = 0, odomPrevPosRight = 0, odomDeltaPosLeft, odomDeltaPosRight, odomDeltaInchesLeft, odomDeltaInchesRight, odomPrevAngle, odomDeltaAngle;
-bool pause;
+
 void odomTracker(void *ignore){
     printf("Odom tracker started\n");
     IMU inertial(inertialPort);
     Controller master(CONTROLLER_MASTER);
 
     //Rotating vector
-    double ethan;
+    double odomRotationAngle;
 
     //Holding variables
     double odomPosLeft, odomPosRight, odomAngle;
@@ -25,7 +26,7 @@ void odomTracker(void *ignore){
             odomDeltaInchesLeft = odomDeltaPosLeft/degPerInch;
             odomDeltaInchesRight = odomDeltaPosRight/degPerInch;
             odomDeltaAngle = odomAngle - odomPrevAngle;
-            ethan = -odomPrevAngle;
+            odomRotationAngle = -odomPrevAngle;
 
             if (odomDeltaAngle > pi){
                 odomDeltaAngle -= tau;
@@ -35,21 +36,18 @@ void odomTracker(void *ignore){
 
             if (odomDeltaAngle != 0){
                 odomRadius = odomDeltaInchesRight/odomDeltaAngle + rightDist;
-                
-                // printf("radius: %f\n", radius);
-                // printf("x: %f\n", radius - radius*cos(odomDeltaAngle));
-                // printf("y: %f\n", sin(odomDeltaAngle)*radius);
+
                 localX = odomRadius - odomRadius*cos(odomDeltaAngle);
                 localY = sin(odomDeltaAngle)*odomRadius;
 
-                globalDeltaX = localX*cos(ethan) - localY*sin(ethan);
-                globalDeltaY = localX*sin(ethan) + localY*cos(ethan);
+                globalDeltaX = localX*cos(odomRotationAngle) - localY*sin(odomRotationAngle);
+                globalDeltaY = localX*sin(odomRotationAngle) + localY*cos(odomRotationAngle);
             } else {
                 localX = 0;
                 localY = (odomDeltaPosLeft + odomDeltaPosRight)/2;
                 
-                globalDeltaX = localX*cos(ethan) - localY*sin(ethan);
-                globalDeltaY = localX*sin(ethan) + localY*cos(ethan);
+                globalDeltaX = localX*cos(odomRotationAngle) - localY*sin(odomRotationAngle);
+                globalDeltaY = localX*sin(odomRotationAngle) + localY*cos(odomRotationAngle);
             }
 
             odomGlobalX += globalDeltaX;

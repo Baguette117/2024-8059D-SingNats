@@ -47,8 +47,6 @@ void controlPID(void *ignore){
                     controlTargPowLeft  = absadd(controlTargLeft, controlTurnKI);
                     controlTargPowRight = absadd(controlTargRight, controlTurnKI); 
                 }
-
-                // controlErrorBearing = controlTargBearing - sensorsBearing;
             }else{
                 controlTargPowLeft = controlErrorLeft*controlKP + controlDerivLeft*controlKD;
                 controlTargPowRight = controlErrorRight*controlKP + controlDerivRight*controlKD;
@@ -106,15 +104,14 @@ bool controlMove(double inches, double timeout, double kp, double kd, double ki)
     controlTargLeft += inches*degPerInch;
     controlTargRight += inches*degPerInch;
 
-    delay(50);
-    while(fabs(controlErrorLeft) > defaultDistanceTolerance || fabs(controlErrorRight) > defaultDistanceTolerance || fabs(sensorsVelocity) > defaultVelocityTolerance){
+    do {
+        delay(50);
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Moving\n");
-        delay(50);
-    }
+    } while (fabs(controlErrorLeft) > defaultDistanceTolerance || fabs(controlErrorRight) > defaultDistanceTolerance || fabs(sensorsVelocity) > defaultVelocityTolerance);
 
     return true;
 }
@@ -131,15 +128,14 @@ bool controlTurn(double degrees, double timeout, double kp, double kd, double ki
     controlTargRight -= degrees*degPerDeg;
     controlTargBearing = boundDeg(controlTargBearing + degrees);
 
-    delay(50);
-    while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
+    do {
+        delay(50);
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(50);
-    }
+    } while (fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance);
     return true;
 }
 
@@ -183,15 +179,14 @@ bool controlTurnTo(double bearing, double timeout, double kp, double kd, double 
     controlTargRight -= errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
-    delay(50);
-    while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
+    do {
+        delay(50);
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(50);
-    }
+    } while (fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance);
     return true;
 }
 
@@ -210,15 +205,15 @@ bool controlTurnLeftTo(double bearing, double timeout, double kp, double kd, dou
     controlTargRight += errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
-    delay(50);
-    while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
+    do {
+        delay(50);
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(50);
-    }
+    } while (fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance);
+
     return true;
 }
 
@@ -237,15 +232,15 @@ bool controlTurnRightTo(double bearing, double timeout, double kp, double kd, do
     controlTargRight += errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
-    delay(50);
-    while(fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance){
+    do {
+        delay(50);
         if (millis() - start > timeout){
             printf("Timeout\n");
             return false;
         }
         printf("Turning\n");
-        delay(50);
-    }
+    } while (fabs(controlErrorLeft) > defaultBearingTolerance || fabs(controlErrorRight) > defaultBearingTolerance || fabs(sensorsVelocityLeft) > defaultVelocityTolerance || fabs(sensorsVelocityRight) > defaultVelocityTolerance);
+
     return true;
 }
 

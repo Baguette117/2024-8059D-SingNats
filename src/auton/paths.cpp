@@ -1,4 +1,6 @@
+#include "control.hpp"
 #include "main.h"
+#include "mechlib.hpp"
 
 bool calibration(int path){
     Task autonSensorsTask(sensorsTracker, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Sensors Task");
@@ -41,12 +43,11 @@ void matchload(){
     Task autonPIDTask(controlPID, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Task");
     Task autonDebugTask(debugTerminal, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Debug Task");
 	Motor intake(intakePort, false);
-	Motor cata(cataPort, false);
 	ADIDigitalOut wingLeft(wingLeftPort, false);
 	ADIDigitalOut wingRight(wingRightPort, false);
     controlPIDEnable = true;
 
-    shoot = true;
+    shoot();
 
     controlMove(26, 1000);
     controlTurnTo(45, 1000);
@@ -57,7 +58,7 @@ void matchload(){
     controlMove(25, 650);
     controlMove(-30, 1000);
     controlSetCoords(0, 28, 45);
-    delay(50);
+    // delay(50); TENTATIVE REMOVAL UNCOMMENT IF AUTON GAY
     master.print(0, 0, "%f %f", odomGlobalX, odomGlobalY);
     controlSpeedCap = 120;
     controlTurnTo(0, 1250);
@@ -84,22 +85,45 @@ void balls(){
     Task autonPIDTask(controlPID, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Task");
     Task autonDebugTask(debugTerminal, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Debug Task");
 	Motor intake(intakePort, false);
-	Motor cata(cataPort, false);
 	ADIDigitalOut wingLeft(wingLeftPort, false);
 	ADIDigitalOut wingRight(wingRightPort, false);
     controlPIDEnable = true;
 
-    shoot = true;
+    shoot();
 
-    controlMove(24, 3000);
+    controlMove(24, 1000);
     controlMoveTo(false, -24, 48, 1000, 1000);
     controlTurnTo(90, 1000);
-    wingRight.set_value(true);
+    wingLeft.set_value(true);
     intake.move(80);
     controlMove(5, 100);
     intake.move(0);
     controlMove(30, 900);
-    controlMove(-5, 500);;
+    controlMove(-5, 500);
+    controlMoveTo(false, -24, 60);
+
+    controlPIDEnable = false;
+    autonDebugTask.remove();
+    autonPIDTask.remove();
+    autonOdomTask.remove();
+    autonSensorsTask.remove();
+}
+
+void skills(){
+    Task autonSensorsTask(sensorsTracker, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Sensors Task");
+    Task autonOdomTask(odomTracker, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Odom Task");
+    Task autonPIDTask(controlPID, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "PID Task");
+    Task autonDebugTask(debugTerminal, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Debug Task");
+	Motor intake(intakePort, false);
+	ADIDigitalOut wingLeft(wingLeftPort, false);
+	ADIDigitalOut wingRight(wingRightPort, false);
+    controlPIDEnable = true;
+
+    shoot(44);
+    do {
+        delay(20);
+    } while (!cataPIDEnable);
+    controlMove(24, 1000);
 
     controlPIDEnable = false;
     autonDebugTask.remove();

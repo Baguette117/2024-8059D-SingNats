@@ -39,9 +39,9 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
-	// //matchload()
-	// ADIDigitalOut wingRight(wingRightPort, false);
-	// wingRight.set_value(true);
+	//matchload()
+	ADIDigitalOut wingRight(wingRightPort, false);
+	wingRight.set_value(true);
 
 	// //balls()
 }
@@ -69,8 +69,8 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	// matchload();
-	balls();
+	matchload();
+	// balls();
 }
 
 /**
@@ -147,6 +147,10 @@ void opcontrol() {
 		if(master.get_digital_new_press(DIGITAL_L2)){
 			wingRightState = !wingRightState;
 			wingRight.set_value(wingRightState);
+		}
+
+		if(master.get_digital_new_press(DIGITAL_X)){
+			shoot();
 		}
 
 		if(master.get_digital_new_press(DIGITAL_UP)){
