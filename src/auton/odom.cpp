@@ -1,7 +1,9 @@
 #include "main.h"
+#include "sensors.hpp"
 
 //externs
 double odomGlobalX = 0, odomGlobalY = 0, globalDeltaY, globalDeltaX, localX, localY, odomRadius, odomPrevPosLeft = 0, odomPrevPosRight = 0, odomDeltaPosLeft, odomDeltaPosRight, odomDeltaInchesLeft, odomDeltaInchesRight, odomPrevAngle, odomDeltaAngle;
+bool odomEnable = true;
 
 void odomTracker(void *ignore){
     printf("Odom tracker started\n");
@@ -13,11 +15,13 @@ void odomTracker(void *ignore){
 
     //Holding variables
     double odomPosLeft, odomPosRight, odomAngle;
+    int counter = 0;
 
     while(true){
-        if(inertial.is_calibrating()){
+        if (inertial.is_calibrating()){
             odomSetCoords(0, 0, 0);
-        }else{
+        } else if (!odomEnable){
+        } else {
             odomPosLeft = sensorsPosLeft;
             odomPosRight = sensorsPosRight;
             odomAngle = sensorsAngle;
@@ -56,8 +60,11 @@ void odomTracker(void *ignore){
             odomPrevPosLeft = odomPosLeft;
             odomPrevPosRight = odomPosRight;
             odomPrevAngle = odomAngle;
-            // master.print(0, 1, "%f", odomAngle);
+            if (!((++counter)%1)){
+            master.print(2, 0, "%f", sensorsBearing);
             master.print(0, 0, "%f %f", odomGlobalX, odomGlobalY);
+
+            }
         }
     }
 

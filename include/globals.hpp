@@ -49,7 +49,8 @@
 //intake
 #define intakePort 10
 
-//wings
+//pneumatics
 #define wingLeftPort 'A'
 #define wingRightPort 'B'
+#define elevPort 'C'
 #endif

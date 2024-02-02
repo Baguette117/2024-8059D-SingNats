@@ -4,8 +4,8 @@
 #define defaultKP .18
 #define defaultKD 5
 #define defaultKI 8
-#define defaultTurnKP .25
-#define defaultTurnKD .37
+#define defaultTurnKP .22
+#define defaultTurnKD .45
 #define defaultTurnKI 13
 #define defaultRampingMax 2
 #define defaultDistanceTolerance 25
@@ -20,14 +20,14 @@ void controlPID(void* ignore);
 void controlDrive(double left, double right);
 
 //relative movements
-bool controlMove(double inches, double timeout = 0, double kp = defaultKP, double kd = defaultKD, double ki = defaultKI);
-bool controlTurn(double degrees, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
+bool controlMove(double inches, double timeout, double kp = defaultKP, double kd = defaultKD, double ki = defaultKI);
+bool controlTurn(double degrees, double timeout, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
 
 //absolute movements
-bool controlMoveTo(bool backwards, double x, double y, double turnTimeout = 0, double moveTimeout = 0, double moveKP = defaultKP, double moveKD = defaultKD, double moveKI = defaultKI, double turnKP = defaultTurnKP, double turnKD = defaultTurnKD, double turnKI = defaultTurnKI);
-bool controlTurnTo(double bearing, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
-bool controlTurnLeftTo(double bearing, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
-bool controlTurnRightTo(double bearing, double timeout = 0, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
+bool controlMoveTo(bool backwards, double x, double y, double turnTimeout, double moveTimeout, double moveKP = defaultKP, double moveKD = defaultKD, double moveKI = defaultKI, double turnKP = defaultTurnKP, double turnKD = defaultTurnKD, double turnKI = defaultTurnKI);
+bool controlTurnTo(double bearing, double timeout, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
+bool controlTurnLeftTo(double bearing, double timeout, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
+bool controlTurnRightTo(double bearing, double timeout, double kp = defaultTurnKP, double kd = defaultTurnKD, double ki = defaultTurnKI);
 
 //other
 void controlSetCoords(double x, double y, double bearing);

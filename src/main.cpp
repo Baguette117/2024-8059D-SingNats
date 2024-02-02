@@ -39,11 +39,19 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
-	//matchload()
-	ADIDigitalOut wingRight(wingRightPort, false);
-	wingRight.set_value(true);
+	// // matchload()
+	ADIDigitalOut wingRight(wingRightPort, true);
+	while (true){
+		if(autonwr) wingRight.set_value(true);
+		delay(50);
+	}
 
-	// //balls()
+	// //failsafe()
+	// ADIDigitalOut wingLeft(wingLeftPort, true);
+	// while (true){
+	// 	if(autonwl) wingLeft.set_value(false);
+	// 	delay(50);
+	// }
 }
 
 /**
@@ -71,6 +79,8 @@ void competition_initialize() {}
 void autonomous() {
 	matchload();
 	// balls();
+	// failsafe();
+	// skills();
 }
 
 /**
@@ -97,10 +107,11 @@ void opcontrol() {
 	Motor cata(cataPort, false);
 	ADIDigitalOut wingLeft(wingLeftPort, false);
 	ADIDigitalOut wingRight(wingRightPort, false);
+	ADIDigitalOut elev(elevPort, false);
     Imu inertial(inertialPort);
 	Controller master(CONTROLLER_MASTER);
 
-	bool invert = true, wingLeftState = false, wingRightState = false;
+	bool invert = true, wingLeftState = false, wingRightState = false, elevState = false;
 	double left, right;
 
 	leftFront.set_brake_mode(MOTOR_BRAKE_HOLD);
@@ -138,6 +149,10 @@ void opcontrol() {
 			intake.move(0);
 		}
 
+		if(master.get_digital_new_press(DIGITAL_X)){
+			shoot();
+		}
+
 		//wing buttons are swapped because the wings are backwards
 		if(master.get_digital_new_press(DIGITAL_R2)){
 			wingLeftState = !wingLeftState;
@@ -149,8 +164,9 @@ void opcontrol() {
 			wingRight.set_value(wingRightState);
 		}
 
-		if(master.get_digital_new_press(DIGITAL_X)){
-			shoot();
+		if(master.get_digital_new_press(DIGITAL_DOWN)){
+			elevState = !elevState;
+			elev.set_value(elevState);
 		}
 
 		if(master.get_digital_new_press(DIGITAL_UP)){

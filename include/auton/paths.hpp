@@ -13,5 +13,9 @@
 bool calibration(int path);
 void matchload();
 void balls();
+void failsafe();
+void skills();
+
+extern bool autonwl, autonwr;
 
 #endif

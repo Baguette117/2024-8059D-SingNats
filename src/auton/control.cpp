@@ -1,4 +1,7 @@
 #include "main.h"
+#include "odom.hpp"
+#include "pros/rtos.hpp"
+#include "sensors.hpp"
 
 //externs
 double controlSpeedCap = defaultSpeedCap, controlKP = defaultKP, controlKD = defaultKD, controlKI = defaultKI, controlTurnKP = defaultTurnKP, controlTurnKD = defaultTurnKD, controlTurnKI = defaultTurnKI, controlRampingMax = defaultRampingMax;
@@ -101,8 +104,8 @@ bool controlMove(double inches, double timeout, double kp, double kd, double ki)
     controlKD = kd;
     controlKI = ki;
 
-    controlTargLeft += inches*degPerInch;
-    controlTargRight += inches*degPerInch;
+    controlTargLeft = sensorsPosLeft + inches*degPerInch;
+    controlTargRight = sensorsPosRight + inches*degPerInch;
 
     do {
         delay(50);
@@ -124,8 +127,8 @@ bool controlTurn(double degrees, double timeout, double kp, double kd, double ki
     controlTurnKP = kp;
     controlTurnKD = kd;
     controlTurnKI = ki;
-    controlTargLeft += degrees*degPerDeg;
-    controlTargRight -= degrees*degPerDeg;
+    controlTargLeft = sensorsPosLeft + degrees*degPerDeg;
+    controlTargRight = sensorsPosRight - degrees*degPerDeg;
     controlTargBearing = boundDeg(controlTargBearing + degrees);
 
     do {
@@ -171,6 +174,7 @@ bool controlTurnTo(double bearing, double timeout, double kp, double kd, double 
 
     double errorBearing = boundDeg(bearing - sensorsBearing);
     if(errorBearing > 180) errorBearing -= 360;
+    if(errorBearing < -180) errorBearing += 360;
 
     controlTurnKP = kp;
     controlTurnKD = kd;
@@ -201,8 +205,8 @@ bool controlTurnLeftTo(double bearing, double timeout, double kp, double kd, dou
     controlTurnKP = kp;
     controlTurnKD = kd;
     controlTurnKI = ki;
-    controlTargLeft -= errorBearing*degPerDeg;
-    controlTargRight += errorBearing*degPerDeg;
+    controlTargLeft = sensorsPosLeft + errorBearing*degPerDeg;
+    controlTargRight =  sensorsPosRight - errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
     do {
@@ -228,8 +232,8 @@ bool controlTurnRightTo(double bearing, double timeout, double kp, double kd, do
     controlTurnKP = kp;
     controlTurnKD = kd;
     controlTurnKI = ki;
-    controlTargLeft -= errorBearing*degPerDeg;
-    controlTargRight += errorBearing*degPerDeg;
+    controlTargLeft = sensorsPosLeft + errorBearing*degPerDeg;
+    controlTargRight = sensorsPosRight - errorBearing*degPerDeg;
     controlTargBearing = bearing;
 
     do {
@@ -246,6 +250,11 @@ bool controlTurnRightTo(double bearing, double timeout, double kp, double kd, do
 
 void controlSetCoords(double x, double y, double bearing){
     printf("controlSetCoords | x: %f\ty: %f\tbearing: %f\n", x, y, bearing);
+    sensorsEnable = false;
+    odomEnable = false;
+    controlPIDEnable = false;
+
+    delay(15);
 
     Motor leftFront(leftFrontPort, leftFrontGearset, leftFrontReversed, leftFrontEncoder);
     Motor leftMid(leftMidPort, leftMidGearset, leftMidReversed, leftMidEncoder);
@@ -261,5 +270,10 @@ void controlSetCoords(double x, double y, double bearing){
     controlTargBearing = boundDeg(bearing);
     odomPrevPosLeft = 0;
     odomPrevPosRight = 0;
-    delay(50);
+
+    delay(15);
+
+    sensorsEnable = true;
+    odomEnable = true;
+    controlPIDEnable = true;
 }

@@ -1,6 +1,7 @@
 #include "main.h"
-
+ //externs
 double sensorsPosLeft, sensorsPosRight, sensorsVelocityLeft, sensorsVelocityRight, sensorsVelocity, sensorsBearing, sensorsAngle, sensorsBearingOffset = 0;
+bool sensorsEnable = true;
 
 void sensorsTracker(void *ignore){
     Motor leftFront(leftFrontPort, leftFrontGearset, leftFrontReversed, leftFrontEncoder);
@@ -36,7 +37,7 @@ void sensorsTracker(void *ignore){
 }
 
 void sensorsSetHeading(double bearing){
-    sensorsBearingOffset = bearing - sensorsBearing;
+    sensorsBearingOffset += bearing - sensorsBearing;
 }
 
 void sensorsTare(){

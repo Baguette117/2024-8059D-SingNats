@@ -31,4 +31,6 @@ void cataPID(void* ignore){
 void shoot(int num){
     targ += 540*num;
     cataPIDEnable = true;
+    delay(50);
+    cataPIDEnable = true;
 }

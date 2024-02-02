@@ -7,5 +7,6 @@ void sensorsSetHeading(double bearing);
 void sensorsTare();
 
 extern double sensorsPosLeft, sensorsPosRight, sensorsVelocityLeft, sensorsVelocityRight, sensorsVelocity, sensorsBearing, sensorsAngle, sensorsBearingOffset;
+extern bool sensorsEnable;
 
 #endif
